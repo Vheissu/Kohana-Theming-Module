@@ -9,4 +9,4 @@
  * @license    http://opensource.org/licenses/BSD-3-Clause
  */
 
-abstract class Theme extends Kohana_Theme {  }
+class Theme extends Kohana_Theme {  }
