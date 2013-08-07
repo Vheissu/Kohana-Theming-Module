@@ -16,36 +16,78 @@ class Kohana_Theme {
 
     protected $_default_theme = "default";
 
-    protected $_current_theme = "";
-    protected $_theme_paths   = array();
+    protected $_current_theme          = "";
+    protected $_current_theme_path = "";
+    protected $_theme_paths            = array();
 
+    // @TODO: Use these for module/view based loading
     protected $_action      = "";
     protected $_controller = "";
     protected $_directory  = "";
 
-    // Instance from the factory
-    protected static $_instance = NULL;
-
-    public function __construct()
+    public function __construct($theme = FALSE)
     {
         $this->_action      = Request::current()->action();
         $this->_controller = Request::current()->controller();
         $this->_directory  = Request::current()->directory();
+
+        // Get all configured theme directories
+        $this->_theme_paths = self::$_config->get("theme_dirs");
+
+        // Our factory method has supplied a theme to load
+        if ($theme !== FALSE)
+        {
+            $this->set_theme($theme);
+        }
     }
 
-    public function factory()
+
+    /**
+     * Factory
+     *
+     * Create a new instance of this class for
+     * medicinal purposes only, of course.
+     *
+     * @param bool $theme
+     * @return class
+     *
+     */
+    public function factory($theme = FALSE)
     {
-        // Store our instance if we don't already have one
-        if (self::$_instance == NULL)
+        $class = get_class($this);
+        return new $class($theme);
+    }
+
+    /**
+     * Current Theme
+     *
+     * Return the current theme name and path
+     *
+     * @return array
+     *
+     */
+    public function current_theme()
+    {
+        $arr = array();
+
+        if ( $this->_current_theme_path !== '' && $this->_current_theme )
         {
-            $class = get_class($this);
-            self::$_instance = new $class();
+            $arr['theme'] = $this->_current_theme;
+            $arr['path']    = $this->_current_theme_path;
         }
 
-        // Return the instance of this class
-        return self::$_instance;
+        return $arr;
     }
 
+    /**
+     * Set Theme
+     *
+     * Sets the theme name to use
+     *
+     * @param str $theme - The theme name
+     * @return void
+     *
+     */
     public function set_theme($theme)
     {
         if ($this->_current_theme !== $theme)
@@ -54,13 +96,19 @@ class Kohana_Theme {
         }
     }
 
+
+    /**
+     * Load
+     *
+     * Look for our theme and set it's
+     * location as a module so we can
+     * play with it.
+     *
+     */
     public function load()
     {
         // Kohana current modules
         $modules = Kohana::modules();
-
-        // Get all stored theme locations
-        $theme_paths = self::$_config->get("theme_dirs");
 
         // Our themes are stored as modules
         $module_path = array();
@@ -75,7 +123,7 @@ class Kohana_Theme {
         }
 
         // Iterate over each config theme path
-        foreach ($theme_paths AS $name => $path)
+        foreach ($this->_theme_paths AS $name => $path)
         {
             // Create our path; theme_directory + theme_name
             $theme_dir = $path . DIRECTORY_SEPARATOR . $this->_current_theme;
@@ -85,6 +133,9 @@ class Kohana_Theme {
             {
                 // Store this directory as a module
                 $module_path[$this->_current_theme] = $theme_dir;
+
+                // Save this for use elsewhere
+                $this->_current_theme_path = $theme_dir;
 
                 // Yep, we found a theme directory
                 $directory_found = TRUE;
@@ -108,6 +159,9 @@ class Kohana_Theme {
 
         // Empty the modules and path variables
         unset($modules, $module_path);
+
+        // If we found a theme, this will be true
+        return $directory_found;
     }
 
 }
