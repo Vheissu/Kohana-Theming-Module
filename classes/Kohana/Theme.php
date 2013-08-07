@@ -20,16 +20,10 @@ class Kohana_Theme {
     protected $_current_theme_path = "";
     protected $_theme_paths            = array();
 
-    // @TODO: Use these for module/view based loading
-    protected $_action      = "";
-    protected $_controller = "";
-    protected $_directory  = "";
-
     public function __construct($theme = FALSE)
     {
-        $this->_action      = Request::current()->action();
-        $this->_controller = Request::current()->controller();
-        $this->_directory  = Request::current()->directory();
+        // Load the config
+        self::$_config = Kohana::$config->load("theme");
 
         // Get all configured theme directories
         $this->_theme_paths = self::$_config->get("theme_dirs");
@@ -38,6 +32,14 @@ class Kohana_Theme {
         if ($theme !== FALSE)
         {
             $this->set_theme($theme);
+        }
+        else
+        {
+            // Default theme if no theme selected
+            if ($this->_current_theme == '')
+            {
+                $this->_current_theme = $this->_default_theme;
+            }
         }
     }
 
@@ -52,10 +54,9 @@ class Kohana_Theme {
      * @return class
      *
      */
-    public function factory($theme = FALSE)
+    public static function factory($theme = FALSE)
     {
-        $class = get_class($this);
-        return new $class($theme);
+        return new Theme($theme);
     }
 
     /**
@@ -115,12 +116,6 @@ class Kohana_Theme {
 
         // Assume no directory was found
         $directory_found = FALSE;
-
-        // Default theme if no theme selected
-        if ($this->_current_theme == '')
-        {
-            $this->_current_theme = $this->_default_theme;
-        }
 
         // Iterate over each config theme path
         foreach ($this->_theme_paths AS $name => $path)
