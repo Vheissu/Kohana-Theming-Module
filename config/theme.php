@@ -27,10 +27,10 @@ return array(
      * before failing completely.
      *
      */
-    "theme_dirs" = > array(
+    "theme_dirs" => array(
         "module_dir" => MODPATH.'theme' . DIRECTORY_SEPARATOR . 'themes',
         "root_dir"      => DOCROOT.'themes',
         "app_dir"       => APPPATH.'themes',
-    );
+    ),
 
 );
