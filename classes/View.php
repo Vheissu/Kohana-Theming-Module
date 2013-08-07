@@ -15,17 +15,16 @@ class View extends Kohana_View {
         $theme = Theme::factory();
 
         // A current theme exists
-        if ( !empty($theme->current_theme()) )
+        if ( $current = $theme->current_theme() )
         {
-            // Get current theme info
-            $current = $theme->current_theme();
+            $theme_root    = Kohana::find_file($current['path'], $file);
+            $theme_views = Kohana::find_file($current['path'] . DIRECTORY_SEPARATOR . 'views', $file);
+            $default           = Kohana::find_file('views', $file);
 
             // A theme view file could not be found
-            if ( ($path = Kohana::find_file($current['path'], $file) === FALSE || ($path = Kohana::find_file($current['path'] . DIRECTORY_SEPARATOR . 'views', $file)) === FALSE || ($path = Kohana::find_file('views', $file)) === FALSE )
+            if ( ($path = $theme_root) === FALSE || ($path = $theme_views) === FALSE || ($path = $default) === FALSE )
             {
-                throw new View_Exception('The requested view :file could not be found in theme directory or view directory.', array(
-                    ':file' => $file,
-                ));
+                throw new View_Exception('The requested view :file could not be found in theme directory or view directory.', array( ':file' => $file, ));
             }
         }
         else
