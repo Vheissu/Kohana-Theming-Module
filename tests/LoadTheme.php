@@ -13,6 +13,8 @@ class LoadTheme extends Unittest_TestCase
      *
      * Simulate loading an actual theme
      *
+     * @group keys
+     *
      */
     public function testLoadActualTheme()
     {
@@ -28,6 +30,7 @@ class LoadTheme extends Unittest_TestCase
      *
      * @expectedException               Kohana_Exception
      * @expectedExceptionMessage did not contain your replace character
+     * @group keys
      *
      */
     public function testGenerateFormatWithoutReplaceChar()
